@@ -1,0 +1,109 @@
+<?php
+
+/**
+ * @file
+ * Contains browser_push_notification.install functionality.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function browser_push_notification_uninstall() {
+  // Delete remaining general module variables.
+  \Drupal::state()->delete('browser_subscriptions');
+  \Drupal::state()->delete('browser_notifications');
+}
+
+/**
+ * Implements hook_schema().
+ */
+function browser_push_notification_schema() {
+  $schema['browser_subscriptions'] = [
+    'description' => 'The base table for storing browser subscription details',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => "The id for the table that is autoincremental id.",
+      ],
+      'subscription_data' => [
+        'description' => 'Store authorization details and crypto key.',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ],
+      'subscription_endpoint' => [
+        'description' => 'Stores browser subscription endpoint.',
+        'type' => 'text',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ],
+      'registered_on' => [
+        'description' => 'Time when an ID is registered.',
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+        
+      ],
+    ],
+    'primary key' => ['id'],
+  ];
+  
+  $schema['browser_notifications'] = [
+    'description' => 'The base table for storing browser notification details',
+    'fields' => [
+      'id' => [
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => "The id for the table that is autoincremental id.",
+      ],
+      'title' => [
+        'description' => 'Store notification title.',
+        'type' => 'varchar',
+        'size' => 'normal',
+        'length' => 255,
+        'not null' => TRUE,
+      ],
+      'body' => [
+        'description' => 'Stores notification body.',
+        'type' => 'varchar',
+        'size' => 'normal',
+        'length' => 500,
+        'not null' => TRUE,
+      ],
+      'icon' => [
+        'description' => 'Stores notification icon.',
+        'type' => 'varchar',
+        'size' => 'normal',
+        'length' => 500,
+        'not null' => TRUE,
+      ],
+      'url' => [
+        'description' => 'Stores notification data url.',
+        'type' => 'varchar',
+        'size' => 'normal',
+        'length' => 500,
+        'not null' => TRUE,    
+      ],
+      
+      'uid' => [
+        'description' => 'Stores userid of created user.',
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,
+      ],
+      'created_date' => [
+        'description' => 'Created date.',
+        'type' => 'int',
+        'size' => 'normal',
+        'not null' => TRUE,    
+      ],
+    ],
+    'primary key' => ['id'],
+  ];
+  
+  return $schema;
+}
+

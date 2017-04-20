@@ -1,0 +1,5 @@
+browser_push_notification.settings:
+  title: 'Browser Push Notification'
+  description: 'Send Browser Push Notification'
+  route_name: browser_push_notification.send_notification
+  parent: system.admin_config_services

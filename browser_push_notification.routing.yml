@@ -1,0 +1,38 @@
+browser_push_notification.send_notification:
+  path: '/admin/config/services/browser_push_notification/send_notification'
+  defaults:
+    _form: '\Drupal\browser_push_notification\Form\PushNotificationForm'
+    _title: 'Browser Push Notification'
+  requirements:
+    _permission: 'Browser Push Notification' 
+  options:
+    _admin_route: TRUE
+
+browser_push_notification.subscription_list:
+  path: '/admin/config/services/browser_push_notification/subscription_list'
+  defaults:
+    _controller: '\Drupal\browser_push_notification\Controller\BrowserPushNotificationController::subscriptionList'
+    _title: 'Browser Push Notification Subscription List'
+  requirements:
+    _permission: 'Browser Push Notification'
+  options:
+    _admin_route: TRUE
+
+browser_push_notification.get_notification:
+  path: '/get_notification'
+  defaults:
+    _controller: '\Drupal\browser_push_notification\Controller\BrowserPushNotificationController::getNotificationRoute'
+  requirements:
+    _access: 'TRUE'
+
+browser_push_notification.subscribe:
+  path: '/subscribe'
+  defaults:
+    _controller: '\Drupal\browser_push_notification\Controller\BrowserPushNotificationController::subscribe'
+  requirements:
+    _access: 'TRUE'
+
+    
+    
+    
+
