@@ -61,13 +61,17 @@ this._stateChangeListener = this._stateChangeListener.bind(this);
   _stateChangeListener(state, data) {
     if (typeof state.interactive !== 'undefined') {
       if (state.interactive) {
+       // this._toggleSwitch.enable();
       } else {
+       // this._toggleSwitch.disable();
       }
     }
 
     if (typeof state.pushEnabled !== 'undefined') {
       if (state.pushEnabled) {
+       // this._toggleSwitch.on();
       } else {
+       // this._toggleSwitch.off();
       }
     }
 
@@ -92,6 +96,9 @@ this._stateChangeListener = this._stateChangeListener.bind(this);
   _subscriptionUpdate(subscription) {
     this._currentSubscription = subscription;
     if (!subscription) {
+      // Remove any subscription from your servers if you have
+      // set it up.
+      //this._sendPushOptions.style.opacity = 0;
       return;
     }
 
@@ -104,14 +111,23 @@ this._stateChangeListener = this._stateChangeListener.bind(this);
       subscriptionObject.keys &&
       subscriptionObject.keys.auth &&
       subscriptionObject.keys.p256dh) {
+      //payloadTextfieldContainer.classList.remove('hidden');
     } else {
+      //payloadTextfieldContainer.classList.add('hidden');
     }
 
     this.updatePushInfo();
+
+    // Display the UI
+    //this._sendPushOptions.style.opacity = 1;
   }
 
   updatePushInfo() {
-     let payloadPromise = Promise.resolve(null);
+    // Let's look at payload
+   // const payloadText = this._payloadTextField.value;
+    let payloadPromise = Promise.resolve(null);
+
+
     // Vapid support
     const vapidPromise = EncryptionHelperFactory.createVapidAuthHeader(
       this._applicationKeys,
@@ -140,6 +156,10 @@ this._stateChangeListener = this._stateChangeListener.bind(this);
       }
 
       const requestInfo = infoFunction();
+
+     
+
+      //this._latestPushInfo = requestInfo;
 
     });
   }
@@ -197,9 +217,12 @@ this._stateChangeListener = this._stateChangeListener.bind(this);
         headers['Crypto-Key'] = `p256ecdsa=${vapidHeaders.p256ecdsa}`;
       }
     }
-    console.log(subscription.endpoint);
-    console.log(headers.Authorization);
-    console.log(headers['Crypto-Key']);
+//alert(headers['Crypto-Key']);
+//alert(subscription.endpoint);
+//alert(headers.Authorization);
+console.log(subscription.endpoint);
+console.log(headers.Authorization);
+console.log(headers['Crypto-Key']);
     const response = {
       headers: headers,
       endpoint: subscription.endpoint
@@ -208,16 +231,18 @@ this._stateChangeListener = this._stateChangeListener.bind(this);
     if (body) {
       response.body = body;
     }
-    var getUrl = window.location;
+var getUrl = window.location;
     var baseUrl = getUrl .protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1]+ "/" + getUrl.pathname.split('/')[2];
     var subcribe_url = baseUrl + '/subscribe';
+   // var subcribe_url = 'http://localhost/d8.2.2/drupal/subscribe';
+   
     jQuery.ajax({
          type : "POST",
          url: subcribe_url,
          data: {
              'authorization':headers.Authorization,
-             'cryptokey':headers['Crypto-Key'],
-             'endpoint':subscription.endpoint},
+        'cryptokey':headers['Crypto-Key'],
+        'endpoint':subscription.endpoint},
          success : function(response){
               console.log(response);
          },   
@@ -234,7 +259,18 @@ this._stateChangeListener = this._stateChangeListener.bind(this);
   }
 
   showErrorMessage(title, message) {
-   alert(message);
+    const errorContainer = document
+      .querySelector('.js-error-message-container');
+
+    const titleElement = errorContainer.querySelector('.js-error-title');
+    const messageElement = errorContainer.querySelector('.js-error-message');
+    titleElement.textContent = title;
+    messageElement.innerHTML = message;
+    errorContainer.style.opacity = 1;
+
+    const pushOptionsContainer = document
+      .querySelector('.js-send-push-options');
+    pushOptionsContainer.style.display = 'none';
   }
 }
 

@@ -77,7 +77,7 @@ class PushNotificationForm extends FormBase {
       '#type' => 'textfield',
       '#required' => TRUE,
       '#title' => $this->t('Notification URL'),
-      '#description' => $this->t('Enter the URL on which user will redirect after clicking on Notification.'),
+      '#description' => $this->t('Enter the URL on which user will redirect after clicking on Notification.Eg.http://example.com/test-contents'),
     ];
     
     $form['sendMessage']['submit'] = array(
@@ -99,7 +99,7 @@ class PushNotificationForm extends FormBase {
    * {@inheritdoc}
    */
   public function submitForm(array &$form, FormStateInterface $form_state) {
-    // Store the notification values in browser_notification table
+    // Store the notification values in browser_notification table to trigger notification
     $account = $this->currentUser();
     // Save the submitted entry.
     $entry = array(
@@ -126,8 +126,7 @@ class PushNotificationForm extends FormBase {
       batch_set($batch);
     }
     if ($return) {
-      //drupal_set_message(t('Created entry @entry', array('@entry' => print_r($entry, TRUE))));
-      drupal_set_message(t('Push notification sent successfully to  @entry users', array('@entry' => print_r(count($subscriptions), TRUE))));
+       drupal_set_message(t('Push notification sent successfully to  @entry users', array('@entry' => print_r(count($subscriptions), TRUE))));
     }
   }
 

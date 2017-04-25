@@ -21,7 +21,7 @@ class BrowserPushNotificationController extends ControllerBase {
    */
   public static function create(ContainerInterface $container) {
     return new static(
-      $container->get('database')
+        $container->get('database')
     );
   }
 
@@ -35,9 +35,8 @@ class BrowserPushNotificationController extends ControllerBase {
   /**
    * This event will be triggered when browser got a push notification.
    */
-  
   public function getNotificationRoute() {
-    
+
     $notificationData = NotificationsDatastorage::loadAll();
     if (!empty($notificationData)) {
       foreach ($notificationData as $key => $notification) {
@@ -54,59 +53,42 @@ class BrowserPushNotificationController extends ControllerBase {
    * This event will be triggered when user subscribe for notification.
    */
   
-  public function subscribe()
-  {
-    $data['Authorization']=\Drupal::request()->request->get('authorization');
-    $data['cryptokey']=\Drupal::request()->request->get('cryptokey');
-    $entry['subscription_endpoint']=\Drupal::request()->request->get('endpoint');
+  public function subscribe() {
+    $data['Authorization'] = \Drupal::request()->request->get('authorization');
+    $data['cryptokey'] = \Drupal::request()->request->get('cryptokey');
+    $entry['subscription_endpoint'] = \Drupal::request()->request->get('endpoint');
     $auth_string = $data['Authorization'];
-    $entry['subscription_data'] = serialize(array('auth'=>$auth_string,'crypto_key'=>$data['cryptokey']));
+    $entry['subscription_data'] = serialize(array('auth' => $auth_string, 'crypto_key' => $data['cryptokey']));
     $entry['registered_on'] = strtotime(date('Y-m-d H:i:s'));
     $result = SubscriptionsDatastorage::insert($entry);
     return new JsonResponse($notification_send);
-
   }
 
-  public function subscriptionList()
-  {
-    $build['pager'] = [
-      '#type' => 'pager',
-    ];
-
-    return $build;
-  }
-  /**
-   * {@inheritdoc}
+   /**
+   * List of all subscribed users.
    */
-  public function userList() {
-    /*$header = [
-      // We make it sortable by ID or Created Date.
+  
+  public function subscriptionList() {
+    // The table description.
+    $header = [
       [
         'data' => $this->t('Id'),
-        'field' => 'id',
-        'sort' => 'asc',
       ],
-      ['data' => $this->t('Register Id')],
+      ['data' => $this->t('Subscription Endpoint')],
       [
-        'data' => $this->t('Register Date'),
-        'field' => 'registered_on',
-        'sort' => 'asc',
+        'data' => $this->t('Registeration Date'),
       ],
     ];
-
     $getFields = [
       'id',
-      'register_id',
+      'subscription_endpoint',
       'registered_on',
     ];
-    $query = $this->database->select(ChromeApiCall::$chromeNotificationTable);
-    $query->fields(ChromeApiCall::$chromeNotificationTable, $getFields);
-    // The actual action of sorting the rows is here.
-    $table_sort = $query->extend('Drupal\Core\Database\Query\TableSortExtender')
-      ->orderByHeader($header);
-    // Limit the rows to 20 for each page.
-    $pager = $table_sort->extend('Drupal\Core\Database\Query\PagerSelectExtender')
-      ->limit(ChromeApiCall::$chromeNotificationViewNumber);
+    $query = $this->database->select(SubscriptionsDatastorage::$browserSubscriptionTable);
+    $query->fields(SubscriptionsDatastorage::$browserSubscriptionTable, $getFields);
+    // Limit the rows to 50 for each page.
+    $pager = $query->extend('Drupal\Core\Database\Query\PagerSelectExtender')
+        ->limit(SubscriptionsDatastorage::$browserSubscriptionCount);
     $result = $pager->execute();
 
     // Populate the rows.
@@ -115,17 +97,18 @@ class BrowserPushNotificationController extends ControllerBase {
       $rows[] = [
         'data' => [
           'id' => $row->id,
-          'register_id' => $row->register_id,
-          'date' => $row->registered_on,
+          'register_id' => $row->subscription_endpoint,
+          'date' => date('d/m/Y', $row->registered_on)
         ],
       ];
     }
-
-    // The table description.
+    if (empty($rows))
+      $markup = 'No record found.';
+    else
+      $markup = 'List of All Subscribed Users.';
     $build = [
-      '#markup' => $this->t('List of All Registered Device'),
+      '#markup' => $this->t($markup),
     ];
-
     // Generate the table.
     $build['config_table'] = [
       '#theme' => 'table',
@@ -133,11 +116,10 @@ class BrowserPushNotificationController extends ControllerBase {
       '#rows' => $rows,
     ];
 
-    // Finally add the pager.
     $build['pager'] = [
       '#type' => 'pager',
     ];
-
-    return $build;*/
+    return $build;
   }
+
 }

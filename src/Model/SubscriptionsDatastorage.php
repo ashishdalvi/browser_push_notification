@@ -8,7 +8,10 @@ namespace Drupal\browser_push_notification\Model;
  * @package Drupal\browser_push_notification\Model
  */
 class SubscriptionsDatastorage {
-
+  
+  public static $browserSubscriptionTable = 'browser_subscriptions';
+  public static $browserSubscriptionCount = 5;
+  
    /**
    * Save an entry in the database.
    *
@@ -25,7 +28,7 @@ class SubscriptionsDatastorage {
   public static function insert($entry) {
     $return_value = NULL;
     $arguments = array(':endpoint' =>"$entry[subscription_endpoint]");
-    $subscription_exist =  db_select('browser_subscriptions')
+    $subscription_exist =  db_select(self::$browserSubscriptionTable)
           ->fields('browser_subscriptions')
           ->where('subscription_endpoint=:endpoint',$arguments)
           ->execute()
@@ -54,7 +57,7 @@ class SubscriptionsDatastorage {
   
   public static function loadAll() {
     // Read all fields from the browser_subscriptions table.
-    $select = db_select('browser_subscriptions', 'browser_subscriptions');
+    $select = db_select(self::$browserSubscriptionTable, 'browser_subscriptions');
     $select->fields('browser_subscriptions');
     return $select->execute()->fetchAll();
   }
@@ -76,7 +79,6 @@ class SubscriptionsDatastorage {
           $notification_send = self::sendNotification($authorization, $crypto_key, $subscription_endpoint);
         }
       }
-      return $build;
     }
   }
 

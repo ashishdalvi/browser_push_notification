@@ -17,23 +17,16 @@ function browser_push_notification_page_attachments(&$page) {
 
 /**
  * Implements hook_page_attachments_alter().
+ * 
+ * Load service-worker only in home page,base url or in login page.
  */
 
 function browser_push_notification_page_attachments_alter(array &$build) {
-  
-  $build['#attached']['library'][] = 'browser_push_notification/service-worker';
-  
-}
+  global $base_url;
+  $login_url = $base_url.'/user/login';
+  $current_path = rtrim($base_url.\Drupal::service('path.current')->getPath(),'/');
+  if($login_url == $current_path || $base_url== $current_path || $is_front = \Drupal::service('path.matcher')->isFrontPage()) { 
+     $build['#attached']['library'][] = 'browser_push_notification/service-worker';
+  }
 
-
-/**
- * Implements hook__push_notification_theme().
- */
-
-function browser_push_notification_theme($existing, $type, $theme, $path) {
-  return array(
-    'theme_browser_push_notification' => array(
-      'variables' => array('base_path' => base_path()),
-    ),
-  );
 }
