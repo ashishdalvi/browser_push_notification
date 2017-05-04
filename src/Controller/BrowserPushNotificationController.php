@@ -4,10 +4,10 @@ namespace Drupal\browser_push_notification\Controller;
 
 use Drupal\Core\Controller\ControllerBase;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Database\Connection;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\browser_push_notification\Model\SubscriptionsDatastorage;
-use Drupal\browser_push_notification\Model\NotificationsDatastorage;
 
 /**
  * Controller routines for Browser push notification.
@@ -30,44 +30,27 @@ class BrowserPushNotificationController extends ControllerBase {
    */
   public function __construct(Connection $database) {
     $this->database = $database;
-  }
 
-  /**
-   * This event will be triggered when browser got a push notification.
-   */
-  public function getNotificationRoute() {
-
-    $notificationData = NotificationsDatastorage::loadAll();
-    if (!empty($notificationData)) {
-      foreach ($notificationData as $key => $notification) {
-        $data['notification']['title'] = $notification->title;
-        $data['notification']['body'] = $notification->body;
-        $data['notification']['icon'] = $notification->icon;
-        $data['notification']['url'] = $notification->url;
-      }
-    }
-    return new JsonResponse($data);
   }
 
   /**
    * This event will be triggered when user subscribe for notification.
    */
-  
-  public function subscribe() {
-    $data['Authorization'] = \Drupal::request()->request->get('authorization');
-    $data['cryptokey'] = \Drupal::request()->request->get('cryptokey');
-    $entry['subscription_endpoint'] = \Drupal::request()->request->get('endpoint');
-    $auth_string = $data['Authorization'];
-    $entry['subscription_data'] = serialize(array('auth' => $auth_string, 'crypto_key' => $data['cryptokey']));
-    $entry['registered_on'] = strtotime(date('Y-m-d H:i:s'));
-    $result = SubscriptionsDatastorage::insert($entry);
-    return new JsonResponse($notification_send);
+  public function subscribe(Request $request) {
+    if ($request) {
+      $data = json_decode($request->getContent(), TRUE);
+      $notification_send = NULL;
+      $entry['subscription_endpoint'] = $data['endpoint'];
+      $entry['subscription_data'] = serialize(['key' => $data['key'], 'token' => $data['token']]);
+      $entry['registered_on'] = strtotime(date('Y-m-d H:i:s'));
+      $success = SubscriptionsDatastorage::insert($entry);
+      return new JsonResponse([$success]);
+    }
   }
 
-   /**
+  /**
    * List of all subscribed users.
    */
-  
   public function subscriptionList() {
     // The table description.
     $header = [
@@ -88,7 +71,7 @@ class BrowserPushNotificationController extends ControllerBase {
     $query->fields(SubscriptionsDatastorage::$browserSubscriptionTable, $getFields);
     // Limit the rows to 50 for each page.
     $pager = $query->extend('Drupal\Core\Database\Query\PagerSelectExtender')
-        ->limit(SubscriptionsDatastorage::$browserSubscriptionCount);
+      ->limit(SubscriptionsDatastorage::$browserSubscriptionCount);
     $result = $pager->execute();
 
     // Populate the rows.
@@ -98,16 +81,18 @@ class BrowserPushNotificationController extends ControllerBase {
         'data' => [
           'id' => $row->id,
           'register_id' => $row->subscription_endpoint,
-          'date' => date('d/m/Y', $row->registered_on)
+          'date' => date('d/m/Y', $row->registered_on),
         ],
       ];
     }
-    if (empty($rows))
-      $markup = 'No record found.';
-    else
-      $markup = 'List of All Subscribed Users.';
+    if (empty($rows)) {
+      $markup = $this->t('No record found.');
+    }
+    else {
+      $markup = $this->t('List of All Subscribed Users.');
+    }
     $build = [
-      '#markup' => $this->t($markup),
+      '#markup' => $markup,
     ];
     // Generate the table.
     $build['config_table'] = [

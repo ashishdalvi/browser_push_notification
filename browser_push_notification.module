@@ -6,27 +6,13 @@
  */
 
 /**
- * Implements hook_page_attachments().
+ * Implements hook_page_attachments_alter() for loaing libraries.
  */
-function browser_push_notification_page_attachments(&$page) {
-  $page['#attached']['html_head_link'][][] = [
-    'rel' => 'manifest',
-    'href' => '/manifest.json',
-  ];
-}
-
-/**
- * Implements hook_page_attachments_alter().
- * 
- * Load service-worker only in home page,base url or in login page.
- */
-
 function browser_push_notification_page_attachments_alter(array &$build) {
-  global $base_url;
-  $login_url = $base_url.'/user/login';
-  $current_path = rtrim($base_url.\Drupal::service('path.current')->getPath(),'/');
-  if($login_url == $current_path || $base_url== $current_path || $is_front = \Drupal::service('path.matcher')->isFrontPage()) { 
-     $build['#attached']['library'][] = 'browser_push_notification/service-worker';
+  $bpn_public_key = \Drupal::config('browser_push_notification.settings')->get('bpn_public_key');
+  $bpn_private_key = \Drupal::config('browser_push_notification.settings')->get('bpn_private_key');
+  $build['#attached']['drupalSettings']['browser_push_notification']['bpn_public_key'] = $bpn_public_key;
+  if (!empty($bpn_public_key)) {
+    $build['#attached']['library'][] = 'browser_push_notification/service-worker';
   }
-
 }
